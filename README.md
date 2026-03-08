@@ -256,9 +256,8 @@ depth.
 ## dbt Lineage
 
 The lineage graph below shows how models depend on each other.
-![Lineage Diagram](images/architecture_diagram.png)
 
-_(Add screenshot from dbt docs)_
+![Lineage Diagram](images/lineage.png)
 
 To generate the lineage graph:
 
