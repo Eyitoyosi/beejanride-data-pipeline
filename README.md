@@ -42,7 +42,7 @@ PostgreSQL → [Airbyte] → raw → staging → intermediate → marts
 
 **intermediate** — business logic lives here. Joins, derived metrics, fraud flags, LTV calculations. `int_trips_enriched` is materialised as a table because four downstream models reference it. The other two are views. Nothing in this layer is meant to be queried directly.
 
-**marts** — uses star schema. Fact tables for trips and dimension tables for drivers, riders and cities. Incremental fact tables are partitioned by date.
+**marts(core)** — uses star schema. Fact tables for trips and dimension tables for drivers, riders and cities. Incremental fact tables are partitioned by date.
 
 ---
 
@@ -96,7 +96,7 @@ Freshness thresholds: trips/payments error after 2 hours. Status events error af
 | int_driver_lifetime_stats | view            | Single consumer                        |
 | int_rider_lifetime_value  | view            | Single consumer                        |
 
-### Marts
+### Marts(core)
 
 | Model        | Schema | Materialization |
 | ------------ | ------ | --------------- |
@@ -266,5 +266,6 @@ Run `dbt docs generate && dbt docs serve` to open the interactive lineage graph.
 Eyitoyosi Alabi\
 Data / Analytics Engineer
 *data-engineering@beejanride.com*
+
 
 
