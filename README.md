@@ -13,16 +13,16 @@ and lifetime value - Driver performance - Revenue trends - Fraud signals
 The project follows a layered **analytics engineering architecture** to
 ensure the data is reliable, modular, and easy to extend.
 
-------------------------------------------------------------------------
+---
 
 ## Stack
 
-| Tool | Role |
-|------|------|
-| PostgreSQL | Transactional source |
-| Airbyte | Ingestion (CDC for trips/events, full-refresh for drivers/riders) |
-| BigQuery | Cloud warehouse |
-| dbt Core | Transformation layer |
+| Tool       | Role                                                              |
+| ---------- | ----------------------------------------------------------------- |
+| PostgreSQL | Transactional source                                              |
+| Airbyte    | Ingestion (CDC for trips/events, full-refresh for drivers/riders) |
+| BigQuery   | Cloud warehouse                                                   |
+| dbt Core   | Transformation layer                                              |
 
 ---
 
@@ -84,33 +84,33 @@ Freshness thresholds: trips/payments error after 2 hours. Status events error af
 
 ### Staging
 
-| Model | Materialization | 
-|-------|----------------|
-| stg_trips | view | |
-| stg_drivers | view | 
-| stg_riders | view | 
-| stg_payments | view | 
-| stg_cities | view | 
-| stg_driver_status_events | incremental | 
+| Model                    | Materialization |
+| ------------------------ | --------------- | --- |
+| stg_trips                | view            |     |
+| stg_drivers              | view            |
+| stg_riders               | view            |
+| stg_payments             | view            |
+| stg_cities               | view            |
+| stg_driver_status_events | incremental     |
 
 ### Intermediate
 
-| Model | Materialization | Why |
-|-------|----------------|-----|
-| int_trips_enriched | table | Referenced by 4+ marts — computes once |
-| int_driver_lifetime_stats | view | Single consumer |
-| int_rider_lifetime_value | view | Single consumer |
+| Model                     | Materialization | Why                                    |
+| ------------------------- | --------------- | -------------------------------------- |
+| int_trips_enriched        | table           | Referenced by 4+ marts — computes once |
+| int_driver_lifetime_stats | view            | Single consumer                        |
+| int_rider_lifetime_value  | view            | Single consumer                        |
 
 ### Marts
 
-| Model | Schema | Materialization |
-|-------|--------|----------------|
-| fct_trips | core | incremental |
-| dim_drivers | core | table |
-| dim_riders | core | table |
-| dim_cities | core | table |
-| dim_vehicles | core | table |
-| dim_date | core | table |
+| Model        | Schema | Materialization |
+| ------------ | ------ | --------------- |
+| fct_trips    | core   | incremental     |
+| dim_drivers  | core   | table           |
+| dim_riders   | core   | table           |
+| dim_cities   | core   | table           |
+| dim_vehicles | core   | table           |
+| dim_date     | core   | table           |
 
 ### Snapshot
 
@@ -138,10 +138,10 @@ Tests are defined in YAML across all layers.
 
 **Custom tests:**
 
-| Test | Checks |
-|------|--------|
-| `assert_no_negative_revenue` | gross_revenue, net_revenue ≥ 0 |
-| `assert_positive_trip_duration` | completed trips have duration > 0 |
+| Test                                | Checks                                      |
+| ----------------------------------- | ------------------------------------------- |
+| `assert_no_negative_revenue`        | gross_revenue, net_revenue ≥ 0              |
+| `assert_positive_trip_duration`     | completed trips have duration > 0           |
 | `assert_completed_trip_has_payment` | completed trips have ≥ 1 successful payment |
 
 **Source freshness** — configured per table.
@@ -150,12 +150,12 @@ Tests are defined in YAML across all layers.
 
 ## Macros
 
-| Macro | What it does |
-|-------|-------------|
-| `calc_net_revenue(fare, fee)` | Deducts platform cut (20%) and processing fee |
-| `calc_duration_minutes(start, end)` | Safe timestamp diff, returns NULL if ≤ 0 |
-| `safe_divide(num, denom)` | NULL instead of divide-by-zero |
-| `generate_surrogate_key_from_cols` | Thin wrapper on dbt_utils surrogate key |
+| Macro                               | What it does                                  |
+| ----------------------------------- | --------------------------------------------- |
+| `calc_net_revenue(fare, fee)`       | Deducts platform cut (20%) and processing fee |
+| `calc_duration_minutes(start, end)` | Safe timestamp diff, returns NULL if ≤ 0      |
+| `safe_divide(num, denom)`           | NULL instead of divide-by-zero                |
+| `generate_surrogate_key_from_cols`  | Thin wrapper on dbt_utils surrogate key       |
 
 ---
 
@@ -178,6 +178,7 @@ dbt docs generate && dbt docs serve   # lineage + docs
 ```
 
 For incremental models after a logic change:
+
 ```bash
 dbt build --full-refresh --select fct_trips+
 ```
@@ -188,9 +189,9 @@ dbt build --full-refresh --select fct_trips+
 
 All queries are in `analyses/sample_analytical_queries.sql`. They cover:
 
-1. Daily revenue by city 
-2. Gross vs net — corporate vs personal 
-3. Top 10 drivers by revenue 
+1. Daily revenue by city
+2. Gross vs net — corporate vs personal
+3. Top 10 drivers by revenue
 4. Rider LTV by segment
 5. Payment failure rate by provider
 6. Surge impact analysis
@@ -224,20 +225,22 @@ Key metrics such as net revenue and trip duration are calculated once
 and reused downstream.
 
 ### Insert_overwrite over merge
+
 BigQuery's `MERGE` is more expensive than partition overwrite for append-heavy tables. Reprocessing the last 1–2 partitions handles late data at lower cost.
 
 ---
+
 # Tradeoffs
 
 Some design decisions were made to balance simplicity and analytical
 depth.
 
--   **Payment details were partially aggregated into the trip model** to
-    simplify analysis.
--   This approach reduces model complexity but hides some retry‑level
-    payment behavior.
--   In a full production system, a separate **`fct_payments` fact
-    table** would likely exist.
+- **Payment details were partially aggregated into the trip model** to
+  simplify analysis.
+- This approach reduces model complexity but hides some retry‑level
+  payment behavior.
+- In a full production system, a separate **`fct_payments` fact
+  table** would likely exist.
 
 ---
 
@@ -248,10 +251,10 @@ depth.
 - **dbt Semantic Layer** — define `revenue`, `ltv`, `churn_rate` as official metrics so BI tools query consistent definitions
 - **Streaming for status events** — move `driver_status_events` to Pub/Sub → BigQuery streaming for sub-minute driver monitoring
 - **ML feature tables** — `int_rider_lifetime_value` and `int_driver_lifetime_stats` are ready to serve as feature store inputs for churn prediction
--   Introduce a dedicated **payment fact table**
--   Implement **incremental models** for very large datasets
--   Build **semantic metrics layer**
--   Create BI dashboards for driver performance and revenue monitoring
+- Introduce a dedicated **payment fact table**
+- Implement **incremental models** for very large datasets
+- Build **semantic metrics layer**
+- Create BI dashboards for driver performance and revenue monitoring
 
 ---
 
@@ -260,12 +263,11 @@ depth.
 The lineage graph below shows how models depend on each other.
 ![Lineage Diagram](images/architecture_diagram.png)
 
-*(Add screenshot from dbt docs)*
+_(Add screenshot from dbt docs)_
 
 To generate the lineage graph:
 
 Run `dbt docs generate && dbt docs serve` to open the interactive lineage graph.
-
 
 # Author
 
