@@ -50,12 +50,7 @@ PostgreSQL → [Airbyte] → raw → staging → intermediate → marts
 
 ![ERD](images/erd_diagram.png)
 
-Six source tables. Central relationships:
 
-- `trips` sits at the middle — every other table connects through it
-- `payments` is a child of `trips` (one trip, potentially multiple payment attempts)
-- `driver_status_events` is a high-volume child of `drivers` (online/offline toggles)
-- `drivers` and `riders` both point to `cities`
 
 ---
 
