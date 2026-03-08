@@ -104,8 +104,6 @@ Freshness thresholds: trips/payments error after 2 hours. Status events error af
 | dim_drivers  | core   | table           |
 | dim_riders   | core   | table           |
 | dim_cities   | core   | table           |
-| dim_vehicles | core   | table           |
-| dim_date     | core   | table           |
 
 ### Snapshot
 
@@ -268,4 +266,5 @@ Run `dbt docs generate && dbt docs serve` to open the interactive lineage graph.
 Eyitoyosi Alabi\
 Data / Analytics Engineer
 *data-engineering@beejanride.com*
+
 
